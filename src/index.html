@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modales Interactivos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-info { background: linear-gradient(145deg, #4ecdc4, #44a08d); }
+        .btn-warning { background: linear-gradient(145deg, #feca57, #ff9f43); }
+        .btn-success { background: linear-gradient(145deg, #5f27cd, #341f97); }
+        .btn-gallery { background: linear-gradient(145deg, #fd79a8, #e84393); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8) translateY(-50px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #ff6b6b;
+        }
+
+        .modal-content {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Form Modal Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Gallery Modal Styles */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Animation Classes */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -30px, 0);
+            }
+            70% {
+                transform: translate3d(0, -15px, 0);
+            }
+            90% {
+                transform: translate3d(0, -4px, 0);
+            }
+        }
+
+        .animate-bounce {
+            animation: bounce 1s ease-in-out;
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌟 Modales Interactivos 🌟</h1>
+    
+    <div class="buttons-container">
+        <button class="btn" onclick="openModal('infoModal')">
+            📋 Modal de Información
+        </button>
+        
+        <button class="btn btn-info" onclick="openModal('formModal')">
+            📝 Modal con Formulario
+        </button>
+        
+        <button class="btn btn-warning" onclick="openModal('confirmModal')">
+            ⚠️ Modal de Confirmación
+        </button>
+        
+        <button class="btn btn-success" onclick="openModal('successModal')">
+            ✅ Modal de Éxito
+        </button>
+        
+        <button class="btn btn-gallery" onclick="openModal('galleryModal')">
+            🖼️ Modal Galería
+        </button>
+        
+        <button class="btn btn-warning" onclick="openModal('animatedModal')">
+            ✨ Modal Animado
+        </button>
+    </div>
+
+    <!-- Modal de Información -->
+    <div id="infoModal" class="modal-overlay" onclick="closeModal(event, 'infoModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Información</h2>
+                <button class="close-btn" onclick="closeModal(event, 'infoModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p>Este es un ejemplo de modal informativo. Los modales son ventanas emergentes que se superponen al contenido principal de la página.</p>
+                <br>
+                <p><strong>Características:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Fondo semi-transparente con blur</li>
+                    <li>Animaciones suaves</li>
+                    <li>Responsive design</li>
+                    <li>Fácil de cerrar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal con Formulario -->
+    <div id="formModal" class="modal-overlay" onclick="closeModal(event, 'formModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Contacto</h2>
+                <button class="close-btn" onclick="closeModal(event, 'formModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form onsubmit="submitForm(event)">
+                    <div class="form-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mensaje:</label>
+                        <textarea id="message" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal-overlay" onclick="closeModal(event, 'confirmModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">⚠️ Confirmación</h2>
+                <button class="close-btn" onclick="closeModal(event, 'confirmModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p>¿Estás seguro de que deseas realizar esta acción? Esta operación no se puede deshacer.</p>
+                <br>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn" style="background: #95a5a6;" onclick="closeModal(event, 'confirmModal')">
+                        Cancelar
+                    </button>
+                    <button class="btn" onclick="confirmAction()">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito -->
+    <div id="successModal" class="modal-overlay" onclick="closeModal(event, 'successModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">✅ ¡Éxito!</h2>
+                <button class="close-btn" onclick="closeModal(event, 'successModal')">&times;</button>
+            </div>
+            <div class="modal-content" style="text-align: center;">
+                <div style="font-size: 4rem; margin: 1rem 0;">🎉</div>
+                <h3 style="color: #27ae60; margin-bottom: 1rem;">Operación Completada</h3>
+                <p>Tu solicitud ha sido procesada exitosamente. Te enviaremos una confirmación por email.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Galería -->
+    <div id="galleryModal" class="modal-overlay" onclick="closeModal(event, 'galleryModal')">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">🖼️ Galería</h2>
+                <button class="close-btn" onclick="closeModal(event, 'galleryModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p>Una galería de elementos interactivos:</p>
+                <div class="gallery-grid">
+                    <div class="gallery-item">🌸</div>
+                    <div class="gallery-item">🌺</div>
+                    <div class="gallery-item">🌻</div>
+                    <div class="gallery-item">🌹</div>
+                    <div class="gallery-item">🌷</div>
+                    <div class="gallery-item">🌼</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Animado -->
+    <div id="animatedModal" class="modal-overlay" onclick="closeModal(event, 'animatedModal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">✨ Modal Animado</h2>
+                <button class="close-btn" onclick="closeModal(event, 'animatedModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div style="text-align: center;">
+                    <div id="animatedEmoji" style="font-size: 4rem; margin: 1rem 0;">🚀</div>
+                    <h3>¡Animaciones Geniales!</h3>
+                    <p>Este modal incluye animaciones especiales que hacen la experiencia más atractiva.</p>
+                    <br>
+                    <button class="submit-btn" onclick="triggerAnimation()">
+                        🎯 Animar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Animación especial para el modal animado
+            if (modalId === 'animatedModal') {
+                setTimeout(() => {
+                    const emoji = document.getElementById('animatedEmoji');
+                    emoji.classList.add('animate-bounce');
+                }, 300);
+            }
+        }
+
+        function closeModal(event, modalId) {
+            event.preventDefault();
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            
+            // Limpiar animaciones
+            const emoji = document.getElementById('animatedEmoji');
+            if (emoji) {
+                emoji.classList.remove('animate-bounce', 'animate-slide-up');
+            }
+        }
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const activeModal = document.querySelector('.modal-overlay.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
+
+        // Función para enviar formulario
+        function submitForm(event) {
+            event.preventDefault();
+            
+            // Simular envío
+            const submitBtn = event.target.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = 'Enviando...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                closeModal(event, 'formModal');
+                setTimeout(() => {
+                    openModal('successModal');
+                }, 300);
+                
+                // Resetear formulario
+                event.target.reset();
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        }
+
+        // Función para confirmar acción
+        function confirmAction() {
+            closeModal(event, 'confirmModal');
+            setTimeout(() => {
+                openModal('successModal');
+            }, 300);
+        }
+
+        // Función para animar emoji
+        function triggerAnimation() {
+            const emoji = document.getElementById('animatedEmoji');
+            const emojis = ['🚀', '⭐', '🎉', '💫', '🌟', '✨'];
+            
+            emoji.classList.remove('animate-bounce', 'animate-slide-up');
+            
+            setTimeout(() => {
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                emoji.classList.add('animate-slide-up');
+            }, 100);
+        }
+
+        // Efecto de partículas al hacer clic en los botones
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Crear efecto de ripple
+                const ripple = document.createElement('div');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255,255,255,0.5);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Agregar CSS para el efecto ripple
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
