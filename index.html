@@ -3,36 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
     <title>Mi web</title>
 </head>
 <body>
 
      <h1>Ing. Omar Perez Franco</h1>
-     <h2>Sitio de ...</h2>
+     <h2 id="subtitulo">Sitio de ...</h2>
 
      <!-- Pendiente:
 
+     -Hacer un notificacion API
+     -Promise y async / await
+
      -Poner en contenedores (div e investigar las secciones en html y css) las partes Sobre mi y Perfil
-     
+
+
      -->
 
-     <h3>Sobre mi:</h3>
+     <div class = "contenedor">
+        <div class = "sobreMi">
+            <h3>Sobre mi:</h3>
 
-     <p>Estudiante de Ingenieria en computacion</p>
-     <p>Centro Universitario de los Altos, UDG.</p>
-     <p>Tepatitlan de Morelos, Jalisco, MX</p>
+            <p>Estudiante de Ingenieria en computacion</p>
+            <p>Centro Universitario de los Altos, UDG.</p>
+            <p>Tepatitlan de Morelos, Jalisco, MX</p>
+        </div>
 
+        <div class="perfil" >
+            <h3>Perfil: </h3>
 
-     <div class="" >
-    <h3>Perfil:</h3>
-
-    <p>Desarollo de software enfocado en tecnologías como HTML, CSS, Javascript</p>
-
+            <p>Desarollo de software enfocado en tecnologías como HTML, CSS, Javascript</p>
+        </div>
     </div>
+
+    <button id="notificacion">Activar notificaciones</button>
 
     <button id="modalesInteractivos" >¡ Pagina de modales interactivos !</button>
 
 
+    <footer>
+        <a href="https://www.linkedin.com/in/omar-perez-franco-a802841b0/">
+            <img src="images/linkedin_icon.png" alt="Linkedin" width="50">
+        </a>
+    </footer>
+
     <script src = "js/app.js"></script>
+
 </body>
 </html>
